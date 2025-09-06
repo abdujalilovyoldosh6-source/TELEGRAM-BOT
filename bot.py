@@ -1,106 +1,107 @@
+import asyncio
 from aiogram import Bot, Dispatcher, types
-from aiogram.utils import executor
+from aiogram.filters import Command
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-TOKEN = "8234701116:AAHd9KqH2__HZltfht0RM-98-aF978YRHhI"  # bu joyga o'z tokeningizni yozing
+# Tokenni ENV dan olish (Render uchun to‘g‘ri)
+import os
+TOKEN = os.getenv("TOKEN")
 
 bot = Bot(token=TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()
 
-# --- Ma'lumotlar ---
+# O‘quvchilar ro‘yxati
 students = [
-    "Abduvohidova G",
-    "Abdujalilov Y",
-    "Absoatov F",
-    "Bozorova B",
-    "Eshmurodov S",
-    "Jumayeva D",
-    "Ko‘chkinov A",
-    "Mamayusupuv R",
-    "Mamanazarov O",
-    "Mengaliyev B",
-    "Turdimurodova M",
-    "Toshpo‘latov A",
-    "Xolmirzayeva F",
-    "Xolmirzayev S",
-    "Xudoyberdiyeva N",
-    "Xushvaqtov J",
-    "O‘razov M",
-    "Choriyev R",
-    "Mengliboyeva D",
-    "Qahhorov M",
-    "To‘xtayeva H",
+    "1. Abduvohidova G",
+    "2. Abdujalilov Y",
+    "3. Absoatov F",
+    "4. Bozorova B",
+    "5. Eshmurodov S",
+    "6. Jumayeva D",
+    "7. Koʻchkinov A",
+    "8. Mamayusupuv R",
+    "9. Mamanazarov O",
+    "10. Mengaliyev B",
+    "11. Mengliboyeva D",
+    "12. Qahhorov M",
+    "13. Toʻxtayeva H",
+    "14. Turdimurodova M",
+    "15. Toshpoʻlatov A",
+    "16. Xolmirzayeva F",
+    "17. Xolmirzayev S",
+    "18. Xudoyberdiyeva N",
+    "19. Xushvaqtov J",
+    "20. Oʻrazov M",
+    "21. Choriyev R"
 ]
 
+# Uy manzillari
 addresses = [
-    "Surxondaryo, Jarqurgon, Xalqobod MFY Novroʻz N124",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY Olmos N91",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY IslomNuri N29",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY IslomNuri N57",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY IslomNuri N22",
-    "Surxondaryo, Qumqorgon, Bobotogʻ MFY Polvonlar N28",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY -",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY Olmos N74",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY Doʻstlik N139",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY Olmos -",
-    "Surxondaryo, Jarqurgon, Xalqobod Xalqparvar -",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY IslomNuri N27",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY IslomNuri -",
-    "- - -",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY Doʻstlik N107",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY Olmos N70",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY Olmos N58",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY Doʻstlik N85",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY Doʻstlik N112",
-    "Surxondaryo, Jarqurgon, Xalqobod MFY Olmos N55",
-    "Surxondaryo, Qumqorgon, Bobotogʻ MFY Polvonlar N8",
+    "1. Abduvohida G: Surxondaryo, Jarqurgon, Xalqobod MFY Novroʻz N124",
+    "2. Abdujalilov Y: Surxondaryo, Jarqurgon, Xalqobod MFY Olmos N91",
+    "3. Absoatov F: Surxondaryo, Jarqurgon, Xalqobod MFY IslomNuri N29",
+    "4. Bozorova B: Surxondaryo, Jarqurgon, Xalqobod MFY IslomNuri N57",
+    "5. Eshmurodov S: Surxondaryo, Jarqurgon, Xalqobod MFY IslomNuri N22",
+    "6. Jumayeva D: Surxondaryo, Qumqorgon, Bobotogʻ MFY Polvonlar N28",
+    "7. Koʻchkinov A: Surxondaryo, Jarqurgon, Xalqobod MFY -",
+    "8. Mamayusupuv R: Surxondaryo, Jarqurgon, Xalqobod MFY Olmos N74",
+    "9. Mamanazarov O: Surxondaryo, Jarqurgon, Xalqobod MFY Doʻstlik N139",
+    "10. Mengaliyev B: Surxondaryo, Jarqurgon, Xalqobod MFY Olmos -",
+    "11. Mengliboyeva D: Surxondaryo, Jarqurgon, Xalqobod Xalqparvar -",
+    "12. Qahhorov M: Surxondaryo, Jarqurgon, Xalqobod MFY IslomNuri N27",
+    "13. Toʻxtayeva H: Surxondaryo, Jarqurgon, Xalqobod MFY IslomNuri -",
+    "14. Turdimurodova M: - - -",
+    "15. Toshpoʻlatov A: Surxondaryo, Jarqurgon, Xalqobod MFY Doʻstlik N107",
+    "16. Xolmirzayeva F: Surxondaryo, Jarqurgon, Xalqobod MFY Olmos N70",
+    "17. Xolmirzayev S: Surxondaryo, Jarqurgon, Xalqobod MFY Olmos N58",
+    "18. Xudoyberdiyeva N: Surxondaryo, Jarqurgon, Xalqobod MFY Doʻstlik N85",
+    "19. Xushvaqtov J: Surxondaryo, Jarqurgon, Xalqobod MFY Doʻstlik N112",
+    "20. Oʻrazov M: Surxondaryo, Jarqurgon, Xalqobod MFY Olmos N55",
+    "21. Choriyev R: Surxondaryo, Qumqurgon, Bobotogʻ MFY Polvonlar N8",
 ]
 
-# --- Start komandasi ---
-@dp.message_handler(commands=['start'])
-async def start_handler(message: types.Message):
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add("📋 O‘quvchilar F.I.")
-    keyboard.add("👨‍👩‍👧 Ota-onalar F.I.")
-    keyboard.add("📞 Ota-onalar telefon raqami")
-    keyboard.add("🏠 Uy manzillari")
-    keyboard.add("📊 Jami o‘quvchilar soni")
-    keyboard.add("👩‍🏫 Sinf rahbari")
-    keyboard.add("🏫 Maktab direktori")
-    await message.answer("Assalomu alaykum!\nQuyidagi menyudan birini tanlang 👇", reply_markup=keyboard)
+# 🔘 Klaviatura menyu
+menu = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Jami o‘quvchilar soni")],
+        [KeyboardButton(text="O‘quvchilar F.I")],
+        [KeyboardButton(text="Ota-onalar F.I")],
+        [KeyboardButton(text="Ota-onalar telefon raqami")],
+        [KeyboardButton(text="Uy manzillari")],
+        [KeyboardButton(text="Sinf rahbari")],
+        [KeyboardButton(text="Maktab direktori")]
+    ],
+    resize_keyboard=True
+)
 
-# --- O‘quvchilar F.I. ---
-@dp.message_handler(lambda msg: msg.text == "📋 O‘quvchilar F.I.")
-async def students_list(message: types.Message):
-    text = "\n".join([f"{i+1}. {name}" for i, name in enumerate(students)])
-    await message.answer(text)
+# /start komandasi
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    await message.answer("Menyudan tanlang 👇", reply_markup=menu)
 
-# --- Ota-onalar F.I. ---
-@dp.message_handler(lambda msg: msg.text == "👨‍👩‍👧 Ota-onalar F.I.")
-async def parents_names(message: types.Message):
-    await message.answer("Biz hali maʼlumot yoʻq.\nBu maʼlumotni olishga ruxsat yoʻq.")
+# Menyu tugmalariga javoblar
+@dp.message()
+async def handle_menu(message: types.Message):
+    if message.text == "Jami o‘quvchilar soni":
+        await message.answer("Jami 21 nafar o‘quvchi mavjud.")
+    elif message.text == "O‘quvchilar F.I":
+        await message.answer("\n".join(students))
+    elif message.text == "Ota-onalar F.I":
+        await message.answer("Bizda hali ota-onalar ma’lumotlari yo‘q.")
+    elif message.text == "Ota-onalar telefon raqami":
+        await message.answer("Bizda hali ota-onalar telefon raqamlari yo‘q.")
+    elif message.text == "Uy manzillari":
+        await message.answer("\n".join(addresses))
+    elif message.text == "Sinf rahbari":
+        await message.answer("Xujanazarov Salim\nTel: +998995550267")
+    elif message.text == "Maktab direktori":
+        await message.answer("Alixanov Abduxoliq\nTel: Bizda bu ma’lumot yo‘q")
+    else:
+        await message.answer("Menyudan foydalaning 👆")
 
-# --- Ota-onalar telefonlari ---
-@dp.message_handler(lambda msg: msg.text == "📞 Ota-onalar telefon raqami")
-async def parents_phones(message: types.Message):
-    await message.answer("Bizda hali maʼlumot yoʻq.")
+# Botni ishga tushirish
+async def main():
+    await dp.start_polling(bot)
 
-# --- Uy manzillari ---
-@dp.message_handler(lambda msg: msg.text == "🏠 Uy manzillari")
-async def addresses_list(message: types.Message):
-    text = "\n".join([f"{i+1}. {addr}" for i, addr in enumerate(addresses)])
-    await message.answer(text)
-
-# --- Jami soni ---
-@dp.message_handler(lambda msg: msg.text == "📊 Jami o‘quvchilar soni")
-async def total_students(message: types.Message):
-    await message.answer(f"Hozircha {len(students)} nafar")
-
-# --- Sinf rahbari ---
-@dp.message_handler(lambda msg: msg.text == "👩‍🏫 Sinf rahbari")
-async def class_teacher(message: types.Message):
-    await message.answer("Sinf rahbari: Xujanazarov Salim\nTelefon: +998995550267")
-
-# --- Maktab direktori ---
-@dp.message_handler(lambda msg: msg.text == "🏫 Maktab direktori")
-async def school_director(message: types.Message):
-    await message.answer("Maktab direktori: Alixanov Abduxoliq\nTelefon: (menda hali bu maʼlumot yoʻq)")
+if name == "main":
+    asyncio.run(main())

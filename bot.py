@@ -1,14 +1,17 @@
-import asyncio
+import logging
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
+from aiogram.utils import executor
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-# Tokenni ENV dan olish (Render uchun to‘g‘ri)
-import os
-TOKEN = os.getenv("TOKEN")
+# 🔹 Tokenni yozib qo‘ying
+TOKEN = "8234701116:AAHd9KqH2__HZltfht0RM-98-aF978YRHhI"
 
+# 🔹 Loglarni yoqamiz (xatoliklarni ko‘rish uchun)
+logging.basicConfig(level=logging.INFO)
+
+# 🔹 Bot va Dispatcher yaratamiz
 bot = Bot(token=TOKEN)
-dp = Dispatcher()
+dp = Dispatcher(bot)
 
 # O‘quvchilar ro‘yxati
 students = [
@@ -75,12 +78,12 @@ menu = ReplyKeyboardMarkup(
 )
 
 # /start komandasi
-@dp.message(Command("start"))
+@dp.message_handler(commands=['start'])
 async def cmd_start(message: types.Message):
     await message.answer("Menyudan tanlang 👇", reply_markup=menu)
 
 # Menyu tugmalariga javoblar
-@dp.message()
+@dp.message_handler()
 async def handle_menu(message: types.Message):
     if message.text == "Jami o‘quvchilar soni":
         await message.answer("Jami 21 nafar o‘quvchi mavjud.")
@@ -99,9 +102,6 @@ async def handle_menu(message: types.Message):
     else:
         await message.answer("Menyudan foydalaning 👆")
 
-# Botni ishga tushirish
-async def main():
-    await dp.start_polling(bot)
-
-if name == "main":
-    asyncio.run(main())
+# 🔹 Botni ishga tushirish
+if __name__ == "__main__":
+    executor.start_polling(dp, skip_updates=True)
